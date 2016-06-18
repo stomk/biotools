@@ -15,8 +15,7 @@ def estimate_span(blast_file, max_gap_len, min_span_len, min_occupancy, delimite
     def print_output(target, bgn, end, occupied_bp, dist):
         span_len = end - bgn + 1
         occupancy = 1.0 * occupied_bp / span_len
-        print_str = delimiter.join([target, str(bgn), str(end), str(end-bgn+1), '%.3f' % occupancy, str(dist)])
-        print print_str
+        print delimiter.join(map(str, [target, bgn, end, end-bgn+1, '%.3f' % occupancy, dist]))
 
     with open(blast_file, 'r') as f:
         hit_table = {}
