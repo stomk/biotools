@@ -12,10 +12,10 @@ def estimate_span(blast_file, max_gap_len, min_span_len, min_occupancy, delimite
         occupancy = 1.0 * occupied_bp / span_len
         return (span_len > min_span_len and occupancy > min_occupancy)
 
-    def print_output(target, bgn, end, occupied_bp):
+    def print_output(target, bgn, end, occupied_bp, dist):
         span_len = end - bgn + 1
         occupancy = 1.0 * occupied_bp / span_len
-        print_str = delimiter.join([target, str(bgn), str(end), str(end-bgn+1), '%.3f' % occupancy])
+        print_str = delimiter.join([target, str(bgn), str(end), str(end-bgn+1), '%.3f' % occupancy, str(dist)])
         print print_str
 
     with open(blast_file, 'r') as f:
@@ -37,16 +37,20 @@ def estimate_span(blast_file, max_gap_len, min_span_len, min_occupancy, delimite
             intervals.sort(key=lambda x: x[0])
             span_bgn, prev_end = intervals[0]
             occupied_bp = prev_end - span_bgn + 1
+            prev_printed_end = 0
             for bgn, end in intervals[1:]:
                 if bgn > prev_end + max_gap_len:
                     if should_print(span_bgn, prev_end, occupied_bp):
-                        print_output(target, span_bgn, prev_end, occupied_bp)
+                        dist_from_prev = span_bgn - prev_printed_end if prev_printed_end != 0 else '-'
+                        print_output(target, span_bgn, prev_end, occupied_bp, dist_from_prev)
+                        prev_printed_end = prev_end
                     span_bgn = bgn
                     occupied_bp = 0
                 prev_end = end
                 occupied_bp += end - bgn + 1
             if should_print(span_bgn, prev_end, occupied_bp):
-                print_output(target, span_bgn, prev_end, occupied_bp)
+                dist_from_prev = span_bgn - prev_printed_end if prev_printed_end != 0 else '-'
+                print_output(target, span_bgn, prev_end, occupied_bp, dist_from_prev)
 
 
 if __name__ == '__main__':
