@@ -24,13 +24,8 @@ def estimate_span(blast_file, max_gap_len, min_span_len, min_occupancy, delimite
             line = line.strip().split('\t')
             target, t_bgn, t_end = (line[1], int(line[8]), int(line[9]))
             if t_bgn > t_end:
-                tmp = t_bgn
-                t_bgn = t_end
-                t_end = tmp
-            if target in hit_table:
-                hit_table[target] = hit_table[target] + [(t_bgn, t_end)]
-            else:
-                hit_table[target] = [(t_bgn, t_end)]
+                t_bgn, t_end = t_end, t_bgn
+            hit_table[target] = hit_table.setdefault(target, []) + [(t_bgn, t_end)]
 
         for target, intervals in hit_table.items():
             intervals.sort(key=lambda x: x[0])
