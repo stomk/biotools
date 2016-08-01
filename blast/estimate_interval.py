@@ -54,6 +54,6 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--max_gap_len',   type=int, default=0, help='Allow gap at maximum of this value')
     parser.add_argument('-s', '--min_span_len',  type=int, default=0, help='Output interval with span length being at least this value')
     parser.add_argument('-p', '--min_occupancy', type=float, default=0.0, help='Output interval with occupancy being at least this value')
-    parser.add_argument('-d', '--delimiter', default='\t', 'Specify delimiter of output')
+    parser.add_argument('-d', '--delimiter', default='\t', help='Specify delimiter of output')
     args = parser.parse_args()
     estimate_span(args.blast_file, args.max_gap_len, args.min_span_len, args.min_occupancy, args.delimiter)
