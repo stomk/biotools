@@ -15,18 +15,23 @@ parser.add_argument('-o', '--out', dest='out_file', default='extracted.fasta', h
 parser.add_argument('-s', '--seq', dest='seq_name', default=None, help='Specify single sequence name to extract')
 parser.add_argument('-b', '--bgn', type=int, help='Specify beginning position')
 parser.add_argument('-e', '--end', type=int, help='Specify end position')
+parser.add_argument('-r', '--orientation', action='store_true')
 
 args = parser.parse_args()
 
 
-def gen_subseq(records, name, bgn, end):
+def gen_subseq_from_record(record, bgn, end, reverse=False):
+    subseq = record.seq[bgn-1:end]
+    if reverse:
+        subseq = subseq.reverse_complement()
+    return SeqRecord(subseq, id='_'.join(map(str, [record.id, bgn, end])), description='')
+
+def gen_subseq_from_records(records, name, bgn, end, reverse=False):
     if not name in records:
         print >> sys.stderr, "Sequence '%s' does not exist in target file" % name
         return
     target_record = records[name]
-    subseq = target_record.seq[bgn-1:end]
-    record = SeqRecord(subseq, id='_'.join(map(str, [name, bgn, end])), description='')
-    return record
+    return gen_subseq_from_record(target_record, bgn, end, reverse)
 
 
 if args.interval_file:
@@ -34,9 +39,14 @@ if args.interval_file:
         records = SeqIO.index(args.seq_file, 'fasta')
         extracted_records = []
         for line in f:
-            name, bgn, end = line.strip().split()[:3]
-            bgn, end = int(bgn), int(end)
-            record = gen_subseq(records, name, bgn, end)
+            fields = line.strip().split()
+            name = fields[0]
+            bgn, end = map(int, fields[1:3])
+            if args.orientation:
+                reverse = True if fields[3] == '-' else False
+            else:
+                reverse = False
+            record = gen_subseq_from_records(records, name, bgn, end, reverse)
             if record:
                 extracted_records.append(record)
 
@@ -44,10 +54,14 @@ if args.interval_file:
 
 elif args.seq_name:
     records = SeqIO.index(args.seq_file, 'fasta')
-    record = gen_subseq(records, args.seq_name, args.bgn, args.end)
+    record = gen_subseq_from_records(records, args.seq_name, args.bgn, args.end)
     SeqIO.write(record, args.out_file, 'fasta')
 
 else:
-    print >> sys.stderr, "[Error] Specify target sequence name by using either '-f' or '-s' option"
+    print >> sys.stderr, "Sequence name was not specified. Assuming the fasta file has only one sequence"
+    record = SeqIO.read(args.seq_file, 'fasta')
+    extracted_record = gen_subseq_from_record(record, args.bgn, args.end)
+    SeqIO.write(extracted_record, args.out_file, 'fasta')
 
+    
 
