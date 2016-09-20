@@ -63,7 +63,6 @@ if args.interval_file:
                     record = gen_subseq_from_records(records, name, bgn, end, reverse)
                 if record:
                     extracted_records.append(record)
-
     SeqIO.write(extracted_records, args.out_file, 'fasta')
 
 elif args.seq_name:
