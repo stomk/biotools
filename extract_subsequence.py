@@ -12,7 +12,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('seq_file', help='Target FASTA file')
 parser.add_argument('-f', '--file', dest='interval_file', help='File containing list of seq, bgn, end ')
 parser.add_argument('-o', '--out', dest='out_file', default='extracted.fasta', help='Output file')
-parser.add_argument('-s', '--seq', dest='seq_name', default=None, help='Specify single sequence name to extract')
+parser.add_argument('-n', '--seq', dest='seq_name', default=None, help='Specify single sequence name to extract')
+parser.add_argument('-s', '--single', action='store_true', help='Process FASTA file with a single sequence in it')
 parser.add_argument('-b', '--bgn', type=int, help='Specify beginning position')
 parser.add_argument('-e', '--end', type=int, help='Specify end position')
 parser.add_argument('-r', '--orientation', action='store_true')
@@ -36,19 +37,32 @@ def gen_subseq_from_records(records, name, bgn, end, reverse=False):
 
 if args.interval_file:
     with open(args.interval_file) as f:
-        records = SeqIO.index(args.seq_file, 'fasta')
         extracted_records = []
-        for line in f:
-            fields = line.strip().split()
-            name = fields[0]
-            bgn, end = map(int, fields[1:3])
-            if args.orientation:
-                reverse = True if fields[3] == '-' else False
-            else:
-                reverse = False
-            record = gen_subseq_from_records(records, name, bgn, end, reverse)
-            if record:
-                extracted_records.append(record)
+        if args.single:
+            record = SeqIO.read(args.seq_file, 'fasta')
+            for line in f:
+                fields = line.strip().split()
+                bgn, end = map(int, fields[0:2])
+                reverse = True if args.orientation and fields[4] == '-' else False
+                s_record = gen_subseq_from_record(record, bgn, end, reverse)
+                if s_record:
+                    extracted_records.append(s_record)
+        else:
+            records = SeqIO.index(args.seq_file, 'fasta')
+            for line in f:
+                fields = line.strip().split()
+                name = fields[0]
+                bgn, end = map(int, fields[1:3])
+                if args.orientation:
+                    reverse = True if fields[3] == '-' else False
+                else:
+                    reverse = False
+                if args.single:
+                    record = gen_subseq_from_record(record, bgn, end, reverse)
+                else:
+                    record = gen_subseq_from_records(records, name, bgn, end, reverse)
+                if record:
+                    extracted_records.append(record)
 
     SeqIO.write(extracted_records, args.out_file, 'fasta')
 
