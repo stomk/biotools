@@ -16,7 +16,7 @@ parser.add_argument('-n', '--seq', dest='seq_name', default=None, help='Specify 
 parser.add_argument('-s', '--single', action='store_true', help='Process FASTA file with a single sequence in it')
 parser.add_argument('-b', '--bgn', type=int, help='Specify beginning position')
 parser.add_argument('-e', '--end', type=int, help='Specify end position')
-parser.add_argument('-r', '--orientation', action='store_true')
+parser.add_argument('-r', '--orientation', action='store_true', help='Consider orientation')
 
 args = parser.parse_args()
 
