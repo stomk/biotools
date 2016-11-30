@@ -51,6 +51,9 @@ if args.interval_file:
             records = SeqIO.index(args.seq_file, 'fasta')
             for line in f:
                 fields = line.strip().split()
+                if len(fields) < 3:
+                    print >> sys.stderr, 'The line "%s" does not have 3 columns. Skipped.' % line
+                    continue
                 name = fields[0]
                 bgn, end = map(int, fields[1:3])
                 if args.orientation:
