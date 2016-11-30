@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
     description='')
 
 parser.add_argument('seq_file', help='Target FASTA file')
-parser.add_argument('-f', '--file', dest='interval_file', help='File containing list of seq, bgn, end ')
+parser.add_argument('-f', '--file', dest='interval_file', help='File containing list of seq, bgn, end (and following additional fields are allowed)')
 parser.add_argument('-o', '--out', dest='out_file', default='extracted.fasta', help='Output file')
 parser.add_argument('-n', '--seq', dest='seq_name', default=None, help='Specify single sequence name to extract')
 parser.add_argument('-s', '--single', action='store_true', help='Process FASTA file with a single sequence in it')
